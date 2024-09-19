@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneio de Magic: The Gathering</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #121212; /* Fundo escuro */
+            color: #e0e0e0; /* Texto claro */
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #1E88E5; /* Azul claro */
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #90CAF9; /* Azul mais claro */
+            margin-top: 20px;
+            border-bottom: 2px solid #90CAF9; /* Azul mais claro */
+            padding-bottom: 5px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .player-list, .matches {
+            flex: 1 1 45%; /* Flexível para se ajustar em telas menores */
+            background: #1E1E1E; /* Fundo escuro */
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #263238; /* Cinza escuro */
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            transition: background 0.3s;
+            cursor: pointer; /* Muda o cursor para indicar que é clicável */
+        }
+        li:hover {
+            background: #37474F; /* Cinza mais claro ao passar o mouse */
+        }
+        li img {
+            width: 80px; /* Tamanho do ícone */
+            height: 80px; /* Tamanho do ícone */
+            margin-right: 10px;
+            border-radius: 50%; /* Ícones redondos */
+        }
+        .nickname {
+            margin-left: 10px;
+            opacity: 0.7;
+            font-style: italic;
+        }
+        .leader-icon {
+            width: 25px;
+            height: 25px;
+            margin-right: 10px;
+        }
+        .match {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #263238; /* Cinza escuro */
+            padding: 10px;
+            border-radius: 5px;
+        }
+        select {
+            padding: 5px;
+            border: 1px solid #1E88E5; /* Azul claro */
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #1E1E1E; /* Fundo escuro */
+            color: #e0e0e0; /* Texto claro */
+        }
+        .vs {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #90CAF9; /* Azul mais claro */
+        }
+        .scoreboard {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            background: #1E1E1E; /* Fundo escuro */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+        .scoreboard th, .scoreboard td {
+            border: 1px solid #1E88E5; /* Azul claro */
+            padding: 10px;
+            text-align: left;
+        }
+        .scoreboard th {
+            background-color: #1E88E5; /* Azul claro */
+            color: white;
+        }
+        button {
+            background-color: #1E88E5; /* Azul claro */
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #1565C0; /* Azul mais escuro */
+        }
+        #message {
+            margin-top: 20px;
+            color: #90CAF9; /* Azul mais claro */
+            text-align: center;
+        }
+        /* Estilos do Modal */
+        .modal {
+            display: none; /* Oculta o modal por padrão */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro com opacidade */
+        }
+        .modal-content {
+            background-color: #1E1E1E; /* Fundo escuro */
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: #1E88E5; /* Azul claro */
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<audio autoplay loop>
+    <source src="sua_musica.mp3" type="audio/mpeg"> <!-- Substitua pelo caminho do seu arquivo de música -->
+    Seu navegador não suporta o elemento de áudio.
+</audio>
+
+<h1>Torneio de Magic: The Gathering</h1>
+
+<div class="container">
+    <div class="player-list">
+        <h2>Jogadores</h2>
+        <ul id="playerList"></ul>
+    </div>
+    <div class="matches">
+        <h2>Confrontos</h2>
+        <div id="matches"></div>
+    </div>
+</div>
+
+<h2>Vitórias</h2>
+<table class="scoreboard">
+    <thead>
+        <tr>
+            <th>Jogador</th>
+            <th>Vitórias</th>
+        </tr>
+    </thead>
+    <tbody id="scoreboard"></tbody>
+</table>
+
+<div id="message"></div>
+
+<input type="file" id="fileInput" style="display: none;" />
+<button onclick="document.getElementById('fileInput').click();">Importar Jogo</button>
+
+<!-- Modal para exibir estatísticas do jogador -->
+<div id="playerStatsModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h3 id="modalPlayerName">Estatísticas do Jogador</h3>
+        <div id="statsContent"></div>
+    </div>
+</div>
+
+<script>
+    const players = [
+        { name: "PeixeRebolado", nickname: "(Peixe)", img: "https://imgur.com/Lo61QSr.png" },
+        { name: "BurenoKawai", nickname: "(Kawai)", img: "https://imgur.com/FZyLfDY.png" },
+        { name: "Alexsendrick", nickname: "(Alex)", img: "https://imgur.com/U5VhrO9.png" },
+        { name: "Valdisdog", nickname: "(Val)", img: "https://imgur.com/wXjEiLL.png" },
+        { name: "FNAFFoxysz", nickname: "(FNAF)", img: "https://imgur.com/iAomN7e.png" },
+        { name: "GhidorahKing", nickname: "(Ghi)", img: "https://imgur.com/zAMu43X.png" }
+    ];
+
+    const rounds = [
+        [["PeixeRebolado", "BurenoKawai"],
+         ["Alexsendrick", "Valdisdog"],
+         ["FNAFFoxysz", "GhidorahKing"]],
+         
+        [["PeixeRebolado", "Valdisdog"],
+         ["BurenoKawai", "GhidorahKing"],
+         ["Alexsendrick", "FNAFFoxysz"]],
+         
+        [["PeixeRebolado", "GhidorahKing"],
+         ["Valdisdog", "FNAFFoxysz"],
+         ["BurenoKawai", "Alexsendrick"]],
+         
+        [["PeixeRebolado", "FNAFFoxysz"],
+         ["GhidorahKing", "Alexsendrick"],
+         ["Valdisdog", "BurenoKawai"]],
+         
+        [["PeixeRebolado", "Alexsendrick"],
+         ["FNAFFoxysz", "BurenoKawai"],
+         ["GhidorahKing", "Valdisdog"]],
+         
+        [["BurenoKawai", "PeixeRebolado"],
+         ["Valdisdog", "Alexsendrick"],
+         ["GhidorahKing", "FNAFFoxysz"]],
+         
+        [["Valdisdog", "PeixeRebolado"],
+         ["GhidorahKing", "BurenoKawai"],
+         ["FNAFFoxysz", "Alexsendrick"]],
+         
+        [["GhidorahKing", "PeixeRebolado"],
+         ["FNAFFoxysz", "Valdisdog"],
+         ["Alexsendrick", "BurenoKawai"]],
+         
+        [["FNAFFoxysz", "PeixeRebolado"],
+         ["Alexsendrick", "GhidorahKing"],
+         ["BurenoKawai", "Valdisdog"]],
+         
+        [["Alexsendrick", "PeixeRebolado"],
+         ["BurenoKawai", "FNAFFoxysz"],
+         ["Valdisdog", "GhidorahKing"]],
+    ];
+
+    const scores = {};
+    const playerStats = {}; // Armazena as estatísticas dos jogadores
+    players.forEach(player => {
+        scores[player.name] = 0;
+        playerStats[player.name] = { wins: 0, losses: 0 }; // Inicializa as estatísticas
+    });
+
+    let currentRound = 0;
+
+    // Carregar dados do localStorage
+    function loadGame() {
+        const savedData = localStorage.getItem('mtgTournament');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            currentRound = data.currentRound;
+            Object.assign(scores, data.scores);
+            Object.assign(playerStats, data.playerStats); // Carrega as estatísticas
+            document.getElementById('message').innerText = 'Dados carregados com sucesso!';
+        }
+    }
+
+    function generatePlayerList() {
+        const playerList = document.getElementById('playerList');
+        playerList.innerHTML = '';
+
+        // Ordena os jogadores com base nas vitórias
+        const sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+        sortedPlayers.forEach(([playerName], index) => {
+            const player = players.find(p => p.name === playerName);
+            const playerItem = document.createElement('li');
+            playerItem.innerHTML = `
+                ${index === 0 ? '<img class="leader-icon" src="https://imgur.com/IewLEs2.png" alt="Líder">' : ''}
+                <img src="${player.img}" alt="Ícone">
+                ${player.name} <span class="nickname">${player.nickname}</span>
+            `;
+            playerItem.onclick = () => showPlayerStats(player.name); // Adiciona evento de clique
+            playerList.appendChild(playerItem);
+        });
+    }
+
+    function showPlayerStats(playerName) {
+        const statsContent = document.getElementById('statsContent');
+        const stats = playerStats[playerName];
+        document.getElementById('modalPlayerName').innerText = `Estatísticas de ${playerName}`;
+        statsContent.innerHTML = `
+            <p><strong>Vitórias:</strong> ${stats.wins}</p>
+            <p><strong>Derrotas:</strong> ${stats.losses}</p>
+        `;
+        document.getElementById('playerStatsModal').style.display = 'block'; // Exibe o modal
+    }
+
+    // Fechar o modal
+    document.getElementById('closeModal').onclick = function() {
+        document.getElementById('playerStatsModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('playerStatsModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function generateMatches() {
+        const matchesDiv = document.getElementById('matches');
+        matchesDiv.innerHTML = '';
+
+        if (currentRound < rounds.length) {
+            matchesDiv.innerHTML += `<h3>Rodada ${currentRound + 1}</h3>`;
+            rounds[currentRound].forEach(match => {
+                const matchDiv = document.createElement('div');
+                matchDiv.className = 'match';
+                const player1 = players.find(p => p.name === match[0]);
+                const player2 = players.find(p => p.name === match[1]);
+                matchDiv.innerHTML = `
+                    <img src="${player1.img}" alt="Ícone" style="width: 50px; height: 50px; margin-right: 10px;">
+                    ${match[0]} 
+                    <span class="vs">vs</span>
+                    <img src="${player2.img}" alt="Ícone" style="width: 50px; height: 50px; margin-left: 10px;">
+                    ${match[1]}
+                    <select id="winner-${match[0]}-${match[1]}">
+                        <option value="">Escolha o vencedor</option>
+                        <option value="${match[0]}">${match[0]}</option>
+                        <option value="${match[1]}">${match[1]}</option>
+                    </select>
+                `;
+                matchesDiv.appendChild(matchDiv);
+            });
+        } else {
+            matchesDiv.innerHTML = '<p>Todas as rodadas foram concluídas!</p>';
+        }
+    }
+
+    function updateScoreboard() {
+        const scoreboard = document.getElementById('scoreboard');
+        scoreboard.innerHTML = '';
+
+        // Ordena os jogadores com base nas vitórias
+        const sortedPlayers = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+
+        sortedPlayers.forEach(([player, points]) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${player}</td><td>${points}</td>`;
+            scoreboard.appendChild(row);
+        });
+    }
+
+    function nextRound() {
+        if (currentRound < rounds.length) {
+            rounds[currentRound].forEach(match => {
+                const winnerSelect = document.getElementById(`winner-${match[0]}-${match[1]}`);
+                if (winnerSelect && winnerSelect.value) {
+                    const winner = winnerSelect.value;
+                    const loser = winner === match[0] ? match[1] : match[0];
+
+                    scores[winner] += 1; // Adiciona 1 vitória ao vencedor
+                    playerStats[winner].wins += 1; // Adiciona vitória ao vencedor
+                    playerStats[loser].losses += 1; // Adiciona derrota ao perdedor
+
+                    // Atualiza o modal do jogador vencedor
+                    updatePlayerStatsModal(winner);
+                }
+            });
+
+            currentRound++;
+            saveGame(); // Salva o jogo após cada rodada
+            generatePlayerList(); // Atualiza a lista de jogadores
+            generateMatches();
+            updateScoreboard();
+        }
+    }
+
+    function updatePlayerStatsModal(playerName) {
+        const stats = playerStats[playerName];
+        const statsContent = document.getElementById('statsContent');
+        statsContent.innerHTML = `
+            <p><strong>Vitórias:</strong> ${stats.wins}</p>
+            <p><strong>Derrotas:</strong> ${stats.losses}</p>
+        `;
+    }
+
+    function saveGame() {
+        const data = {
+            currentRound: currentRound,
+            scores: scores,
+            playerStats: playerStats // Salva as estatísticas dos jogadores
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mtg_tournament.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        document.getElementById('message').innerText = 'Dados salvos em mtg_tournament.json!';
+    }
+
+    function importGame(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = JSON.parse(e.target.result);
+                currentRound = data.currentRound;
+                Object.assign(scores, data.scores);
+                Object.assign(playerStats, data.playerStats); // Carrega as estatísticas
+                document.getElementById('message').innerText = 'Dados importados com sucesso!';
+                generatePlayerList(); // Atualiza a lista de jogadores
+                generateMatches();
+                updateScoreboard();
+            };
+            reader.readAsText(file);
+        }
+    }
+
+    // Inicializa os confrontos da primeira rodada
+    loadGame();
+    generatePlayerList(); // Gera a lista de jogadores
+    generateMatches();
+    updateScoreboard();
+
+    // Adiciona evento para importar jogo
+    document.getElementById('fileInput').addEventListener('change', importGame);
+</script>
+
+<button onclick="nextRound()">Próxima Rodada</button>
+<button onclick="saveGame()">Salvar Jogo</button>
+<button onclick="document.getElementById('fileInput').click
